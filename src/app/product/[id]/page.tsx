@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useParams } from 'next/navigation';
@@ -6,48 +5,31 @@ import { useEffect, useState } from 'react';
 import { sanityClient } from '@/sanity/lib/client';
 import imageUrlBuilder from '@sanity/image-url';
 
-interface Color {
-  colorName: string;
-  imageUrl: {
-    asset: {
-      _ref: string;
-    };
-  };
-}
-
+// Define interfaces
 interface Review {
   rating: number;
   comment: string;
   author: string;
-  _key?: string;
+  _key?: string; // Optional for uniqueness
 }
 
 interface Product {
-  _id: string;
   title: string;
   description: string;
   price: number;
   priceWithoutDiscount?: number;
   discount?: number;
-  badge?: string;
-  image: {
-    asset: {
-      _ref: string;
-    };
-  };
   inventory: number;
-  category: {
-    _ref: string;
-    _type: string;
-  };
+  image?: { asset: { _ref: string } };
+  badge?: string;
   tags?: string[];
-  colors?: Color[];
   reviews?: Review[];
 }
 
 const ProductDetails = () => {
   const params = useParams();
-  const id = params?.id;
+  const id = params?.id as string;
+
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -55,81 +37,56 @@ const ProductDetails = () => {
 
   const builder = imageUrlBuilder(sanityClient);
 
-  const urlFor = (source: { asset: { _ref: string } } | undefined): string =>  {
-    if (!source?.asset?._ref) {;
-    return '/placeholder-image.jpg';
-  };
-  return builder.image(source.asset._ref).url();
-}
-  useEffect(() => {
-    if (!id) {
-      setError('Product ID is missing');
-      setLoading(false);
-      return;
+  const urlFor = (source?: { asset: { _ref: string } }): string => {
+    if (!source?.asset?._ref) {
+      return '/placeholder-image.jpg';
     }
+    return builder.image(source.asset._ref).url();
+  };
 
-    const query = `*[_type == "products" && _id == $id][0]{
-      _id,
-      title,
-      description,
-      price,
-      priceWithoutDiscount,
-      discount,
-      badge,
-      image {
-        asset {
-          _ref
-        }
-      },
-      inventory,
-      category->,
-      tags,
-      colors[] {
-        colorName,
-        imageUrl {
-          asset {
-            _ref
-          }
-        }
-      },
-      reviews[] {
-        rating,
-        comment,
-        author,
-        _key
-      }
-    }`;
+  useEffect(() => {
+    if (!id) return;
 
-    sanityClient
-      .fetch(query, { id })
-      .then((data) => {
-        console.log('Fetched Product Data:', data);
-        if (data) {
-          setProduct(data);
+    const fetchProduct = async () => {
+      try {
+        const query = `*[_type == "products" && _id == $id][0]`;
+        const result = await sanityClient.fetch(query, { id });
+
+        if (result) {
+          setProduct(result);
         } else {
           setError('Product not found');
         }
-      })
-      .catch((err) => {
-        console.error('Error fetching product details:', err);
-        setError('Failed to load product details');
-      })
-      .finally(() => {
+      } catch (err) {
+        setError('Error fetching product details');
+      } finally {
         setLoading(false);
-      });
+      }
+    };
+
+    fetchProduct();
   }, [id]);
 
-  const handleReviewSubmit = () => {
-    // Implement the review submission logic here (e.g., updating the product in Sanity)
-    if (newReview.rating && newReview.comment && newReview.author) {
-      const updatedReviews = [...(product?.reviews || []), newReview];
-      setProduct((prevProduct) => prevProduct ? { ...prevProduct, reviews: updatedReviews } : null);
+  const handleReviewSubmit = async () => {
+    if (!newReview.author || newReview.rating === 0 || !newReview.comment) {
+      alert('Please fill out all fields');
+      return;
+    }
+
+    try {
+      const updatedReviews = [...(product?.reviews || []), { ...newReview, _key: Date.now().toString() }];
+
+      setProduct((prev) => prev ? { ...prev, reviews: updatedReviews } : null);
       setNewReview({ rating: 0, comment: '', author: '' });
+
       alert('Review submitted successfully!');
-    } else {
-      alert('Please fill all fields.');
+    } catch (error) {
+      alert('Failed to submit review');
     }
   };
+
+  if (loading) return <p className="text-center text-lg">Loading product...</p>;
+  if (error) return <p className="text-center text-red-500">{error}</p>;
 
   return (
     <div className="container mx-auto p-6">
@@ -141,10 +98,10 @@ const ProductDetails = () => {
               {product.badge}
             </div>
           )}
-          {product?.image && urlFor(product.image) ? (
+          {product?.image ? (
             <img
               src={urlFor(product.image)}
-              alt={product.title}
+              alt={product?.title || 'Product'}
               className="w-full max-w-[500px] h-auto rounded-3xl shadow-lg mt-10"
             />
           ) : (
@@ -161,13 +118,9 @@ const ProductDetails = () => {
 
           {/* Price Section */}
           <div className="flex items-center gap-4 mb-4">
-            <p className="text-2xl font-bold text-gray-800">
-              ${product?.price?.toFixed(2)}
-            </p>
+            <p className="text-2xl font-bold text-gray-800">${product?.price?.toFixed(2)}</p>
             {product?.priceWithoutDiscount && (
-              <p className="text-lg text-gray-400 line-through">
-                ${product.priceWithoutDiscount.toFixed(2)}
-              </p>
+              <p className="text-lg text-gray-400 line-through">${product.priceWithoutDiscount.toFixed(2)}</p>
             )}
             {product?.discount && (
               <span className="px-3 py-1 bg-red-100 text-red-600 rounded-full text-sm">
@@ -179,42 +132,25 @@ const ProductDetails = () => {
           {/* Inventory Status */}
           <div className="mb-6">
             <p className={`text-sm ${product?.inventory > 0 ? 'text-green-600' : 'text-red-600'}`}>
-              {product?.inventory > 0
-                ? `${product.inventory} units in stock`
-                : 'Out of stock'}
+              {product?.inventory > 0 ? `${product.inventory} units in stock` : 'Out of stock'}
             </p>
           </div>
 
           {/* Add to Cart Button */}
           <button
-            onClick={() => {
-              alert(`${product?.title} added to cart!`);
-            }}
+            onClick={() => alert(`${product?.title} added to cart!`)}
             disabled={!product?.inventory || product.inventory <= 0}
             className={`mt-8 w-full md:w-auto px-8 py-3 rounded-lg transition duration-300 flex items-center justify-center gap-2
-              ${product?.inventory > 0
-                ? 'bg-blue-500 text-white hover:bg-blue-600'
-                : 'bg-gray-300 text-gray-500 cursor-not-allowed'}`}
+              ${product?.inventory > 0 ? 'bg-blue-500 text-white hover:bg-blue-600' : 'bg-gray-300 text-gray-500 cursor-not-allowed'}`}
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5"
-              viewBox="0 0 20 20"
-              fill="currentColor"
-            >
-              <path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3zM16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z" />
-            </svg>
-            {product?.inventory > 0 ? 'Add to Cart' : 'Out of Stock'}
+            Add to Cart
           </button>
 
           {/* Tags */}
           {product?.tags && product.tags.length > 0 && (
             <div className="mt-6 flex flex-wrap gap-2">
               {product.tags.map((tag, index) => (
-                <span
-                  key={index}
-                  className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm"
-                >
+                <span key={index} className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm">
                   {tag}
                 </span>
               ))}
@@ -227,7 +163,6 @@ const ProductDetails = () => {
       <div className="mt-10">
         <h2 className="text-2xl font-semibold text-gray-800">Reviews</h2>
         <div className="mt-6">
-          {/* Display existing reviews */}
           {product?.reviews && product.reviews.length > 0 ? (
             product.reviews.map((review, index) => (
               <div key={review._key || index} className="border-b py-4">
@@ -250,47 +185,9 @@ const ProductDetails = () => {
         {/* Review Form */}
         <div className="mt-8">
           <h3 className="text-lg font-semibold text-gray-800">Add a Review</h3>
-          <div className="mt-4">
-            <label htmlFor="author" className="block text-gray-600">Your Name</label>
-            <input
-              type="text"
-              id="author"
-              className="w-full p-3 border rounded-lg mt-2"
-              value={newReview.author}
-              onChange={(e) => setNewReview({ ...newReview, author: e.target.value })}
-            />
-          </div>
-          <div className="mt-4">
-            <label htmlFor="rating" className="block text-gray-600">Rating</label>
-            <select
-              id="rating"
-              className="w-full p-3 border rounded-lg mt-2"
-              value={newReview.rating}
-              onChange={(e) => setNewReview({ ...newReview, rating: parseInt(e.target.value) })}
-            >
-              <option value="0">Select rating</option>
-              <option value="1">1 - Poor</option>
-              <option value="2">2 - Fair</option>
-              <option value="3">3 - Good</option>
-              <option value="4">4 - Very Good</option>
-              <option value="5">5 - Excellent</option>
-            </select>
-          </div>
-          <div className="mt-4">
-            <label htmlFor="comment" className="block text-gray-600">Comment</label>
-            <textarea
-              id="comment"
-              className="w-full p-3 border rounded-lg mt-2"
-              value={newReview.comment}
-              onChange={(e) => setNewReview({ ...newReview, comment: e.target.value })}
-            />
-          </div>
-          <button
-            onClick={handleReviewSubmit}
-            className="mt-4 px-8 py-3 bg-blue-500 text-white rounded-lg"
-          >
-            Submit Review
-          </button>
+          <input type="text" className="w-full p-3 border rounded-lg mt-2" value={newReview.author} placeholder="Your Name" onChange={(e) => setNewReview({ ...newReview, author: e.target.value })} />
+          <textarea className="w-full p-3 border rounded-lg mt-2" value={newReview.comment} placeholder="Comment" onChange={(e) => setNewReview({ ...newReview, comment: e.target.value })} />
+          <button onClick={handleReviewSubmit} className="mt-4 px-8 py-3 bg-blue-500 text-white rounded-lg">Submit Review</button>
         </div>
       </div>
     </div>
