@@ -99,11 +99,11 @@ const ProductDetails = () => {
             </div>
           )}
           {product?.image ? (
-            <img
-              src={urlFor(product.image)}
-              alt={product?.title || 'Product'}
-              className="w-full max-w-[500px] h-auto rounded-3xl shadow-lg mt-10"
-            />
+           <img
+           src={urlFor(product.image) ?? undefined} // Fixes null issue
+           alt={product.title || "Product Image"} // Prevents empty alt errors
+           className="w-full max-w-[500px] h-auto rounded-3xl shadow-lg mt-10"
+         />
           ) : (
             <div className="w-full max-w-[500px] h-[500px] rounded-3xl shadow-lg mt-10 bg-gray-200 flex items-center justify-center">
               <span className="text-gray-500">No image available</span>

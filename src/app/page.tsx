@@ -247,7 +247,7 @@ export default function Home() {
     {/* Featured Products */}
     <div className='mt-10 mr-10'>
         <h2 className='font-inter text-2xl font-semibold text-gray-800'>Featured Products</h2>
-        <div className="grid grid-cols-3 gap-6 mt-4">
+        <div className="grid grid-cols-3 sm:grid-col gap-6 mt-4">
             {ourProducts.map((product) => (
                 <div 
                 key={product._id} 
@@ -280,7 +280,7 @@ export default function Home() {
     {/* Our Products Section */}
     <div className='mt-10'>
         <h2 className='font-inter text-2xl font-semibold text-gray-800'>Our Products</h2>
-        <div className="grid grid-cols-3 gap-6 mt-4">
+        <div className="grid grid-cols-3 sm:grid-col gap-6 mt-4">
             {ourProducts.map((product) => (
                 <div 
                 key={product._id} 
