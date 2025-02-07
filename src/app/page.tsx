@@ -1,5 +1,5 @@
-
 'use client';
+import { MouseEvent } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import Navbar from "./components/Navbar";
@@ -97,17 +97,19 @@ export default function Home() {
 
   // Close dropdown when clicking outside
   useEffect(() => {
-    const handleClickOutside = (event: any) => {
-      if (dropdownOpen && !event.target.closest('.dropdown')) {
+    const handleClickOutside = (event: Event) => {
+      const target = event.target as HTMLElement;
+      if (dropdownOpen && !target.closest('.dropdown')) {
         setDropdownOpen(false);
       }
     };
-    document.addEventListener('mousedown', handleClickOutside);
+  
+    document.addEventListener('mousedown', handleClickOutside as EventListener);
+    
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('mousedown', handleClickOutside as EventListener);
     };
   }, [dropdownOpen]);
-
   return (
     <div className="min-h-screen bg-white flex flex-col">
       <Navbar />
@@ -255,8 +257,11 @@ export default function Home() {
                 onClick={() => router.push(`/product/${product._id}`)} // 👉 Navigate on click
             >
                 <div className="overflow-hidden rounded-md">
-                    <img src={product.image.asset.url} 
+                    <Image src={product.image.asset.url} 
                          alt={product.title} 
+                         width={60}
+                         height={60}
+                         unoptimized={true}
                          className='w-full h-60 object-cover rounded-md transition-transform duration-300 hover:scale-110'/>
                 </div>
                 <h3 className='text-center text-lg font-medium mt-2'>{product.title}</h3>
@@ -288,8 +293,11 @@ export default function Home() {
                 onClick={() => router.push(`/product/${product._id}`)} // 👉 Navigate on click
             >
                 <div className="overflow-hidden rounded-md">
-                    <img src={product.image.asset.url} 
+                    <Image src={product.image.asset.url} 
                          alt={product.title} 
+                         width={60}
+                         height={60}
+                         unoptimized={true}
                          className='w-full h-60 object-cover rounded-md transition-transform duration-300 hover:scale-110'/>
                 </div>
                 <h3 className='text-center text-lg font-medium mt-2'>{product.title}</h3>

@@ -1,5 +1,5 @@
 'use client';
-
+import Image from 'next/image';
 import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { sanityClient } from '@/sanity/lib/client';
@@ -57,7 +57,7 @@ const ProductDetails = () => {
         } else {
           setError('Product not found');
         }
-      } catch (err) {
+      } catch{
         setError('Error fetching product details');
       } finally {
         setLoading(false);
@@ -99,9 +99,12 @@ const ProductDetails = () => {
             </div>
           )}
           {product?.image ? (
-           <img
+           <Image
            src={urlFor(product.image) ?? undefined} // Fixes null issue
            alt={product.title || "Product Image"} // Prevents empty alt errors
+           width={400}
+           height={400}
+           unoptimized={true}
            className="w-full max-w-[500px] h-auto rounded-3xl shadow-lg mt-10"
          />
           ) : (
