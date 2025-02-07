@@ -1,22 +1,116 @@
-'use client'
+
+'use client';
 import Image from 'next/image';
 import Link from 'next/link';
 import Navbar from "./components/Navbar";
 import { FaShoppingCart } from 'react-icons/fa'; // Importing the shopping cart icon
 import { useState } from 'react';
+import {sanityClient} from '@/sanity/lib/client';
+import { useRouter } from 'next/navigation'; 
+import { useEffect } from 'react';
 
+interface Product {
+  _id: string;
+  title: string;
+  image: {
+      asset: {
+          url: string;
+      };
+  };
+}
+
+interface Category {
+  _id: string;
+  title: string;
+  image: {
+      asset: {
+          url: string;
+      };
+  };
+}
+const fetchData = async () => {
+  const query = `
+    {
+        "ourProducts": *[_type == "products"] {
+            _id,
+            title,
+            image {
+                asset-> {
+                    url
+                }
+            }
+        },
+        "featuredProducts": *[_type == "products"] {
+            _id,
+            title,
+            image {
+                asset-> {
+                    url
+                }
+            }
+        },
+        "topCategories": *[_type == "category"] {
+            _id,
+            title,
+            image {
+                asset-> {
+                    url
+                }
+            }
+        }
+    }
+`;
+
+  const data = await sanityClient.fetch(query);
+  return data;
+};
 export default function Home() {
+  const CartButton = () => {
+    // Initialize the cart count state
+    const [cartCount, setCartCount] = useState(0);
+  
+    // Function to handle adding a product to the cart
+    const addToCart = () => {
+      setCartCount(cartCount + 1); // Increase the cart count by 1
+    };}
+  const router = useRouter(); // Initialize the router
+  const [ourProducts, setOurProducts] = useState<Product[]>([]);
+    const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
+    const [topCategories, setTopCategories] = useState<Category[]>([]);
+
+    useEffect(() => {
+        const getData = async () => {
+            const data = await fetchData();
+            setOurProducts(data.ourProducts);
+            setFeaturedProducts(data.featuredProducts);
+            setTopCategories(data.topCategories);
+        };
+        getData();
+    }, []);
+
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [dropdownOpen, setDropdownOpen] = useState(false); 
+  const [dropdownOpen, setDropdownOpen] = useState(false);
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen); // Toggle menu open/close
   };
 
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: any) => {
+      if (dropdownOpen && !event.target.closest('.dropdown')) {
+        setDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [dropdownOpen]);
+
   return (
     <div className="min-h-screen bg-white flex flex-col">
       <Navbar />
-      
       {/* Top Section with Logo and Cart Button */}
       <div className="w-full h-20 bg-[#F0F2F3] py-4 px-4 md:px-6 flex justify-between items-center md:px-20 lg:px-40">
         <Image src="/logo-sofa.png" alt="logo" width={166} height={40} />
@@ -28,7 +122,7 @@ export default function Home() {
             <p className="text-black">Cart</p>
             {/* Badge Circle with Number */}
             <div className="absolute top-0 right-0 w-6 h-6 rounded-full bg-[#007580] text-white text-xs flex items-center justify-center">
-              2 {/* This is the number you can update */}
+              0 {/* This is the number you can update */}
             </div>
           </button>
         </Link>
@@ -53,54 +147,42 @@ export default function Home() {
             <li><Link href="/" className="block text-[#007580]">Pages</Link></li>
             <li><Link href="/about" className="block text-[#007580]">About</Link></li>
             <li><Link href="/contact" className="block text-[#007580]">Contact</Link></li>
-            <li className="relative">
-    <button
-      className="block text-[#007580] flex items-center justify-center"
-      onClick={() => setDropdownOpen(!dropdownOpen)}
-    >
-      Eng
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        className="ml-2 h-4 w-4"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth={2}
-        viewBox="0 0 24 24"
-      >
-        <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-      </svg>
-    </button>
-    {dropdownOpen && (
-      <ul className="absolute top-8 left-0 bg-white text-[#272343] shadow-lg rounded-md w-full">
-        <li className="px-4 py-2 hover:bg-gray-200 cursor-pointer">English</li>
-        <li className="px-4 py-2 hover:bg-gray-200 cursor-pointer">Spanish</li>
-        <li className="px-4 py-2 hover:bg-gray-200 cursor-pointer">French</li>
-        <li className="px-4 py-2 hover:bg-gray-200 cursor-pointer">Japanese</li>
-        <li className="px-4 py-2 hover:bg-gray-200 cursor-pointer">Arabic</li>
-      </ul>
-    )}
-  </li>
-
-  {/* FAQs */}
-  <li>
-    <Link href="/faqs" className="block text-[#007580]">
-      FAQs
-    </Link>
-  </li>
-
-  {/* Need Help */}
-  <li className="flex items-center justify-center space-x-2">
-    <div className="w-5 h-5 flex items-center justify-center rounded-full border border-[#007580] text-[#007580] font-bold text-xs">
-      !
-    </div>
-    <button className="text-[#007580]">Need Help</button>
-  </li>
-  <li className="mt-4">
-              <Link href="/product1">
-                
-              </Link>
+            <li className="relative dropdown">
+              <button
+                className="block text-[#007580] flex items-center justify-center"
+                onClick={() => setDropdownOpen(!dropdownOpen)}
+              >
+                Eng
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="ml-2 h-4 w-4"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              {dropdownOpen && (
+                <ul className="absolute top-8 left-0 bg-white text-[#272343] shadow-lg rounded-md w-full">
+                  {['English', 'Spanish', 'French', 'Japanese', 'Arabic'].map((language, index) => (
+                    <li key={index} className="px-4 py-2 hover:bg-gray-200 cursor-pointer">
+                      {language}
+                    </li>
+                  ))}
+                </ul>
+              )}
             </li>
-</ul>
+            <li><Link href="/faqs" className="block text-[#007580]">FAQs</Link></li>
+            <li className="flex items-center justify-center space-x-2">
+              <div className="w-5 h-5 flex items-center justify-center rounded-full border border-[#007580] text-[#007580] font-bold text-xs">
+                !
+              </div>
+              <button className="text-[#007580]">Need Help</button>
+            </li>
+          </ul>
+        
 
             {/* Cart Button in Mobile Menu */}
             
@@ -159,46 +241,64 @@ export default function Home() {
 
       {/* Company Logo Section */}
       <div className='w-full max-w-6xl mx-auto bg-white py-8'>
-        <Image src="/Company Logo.png" alt="logo" width={1321} height={139} className="mx-auto" />
-        <div className='w-full py-8'>
-          <h1 className='font-inter text-2xl font-semibold text-[#272343] ml-4'>
-            Featured Products
-          </h1>
-          <div className='mt-8 flex flex-wrap justify-center mr-6'>
-            <Image src="/Products.png" alt="chair" width={230} height={230} className='m-2'/>
-            <Image src="/Products (1).png" alt="chair2" width={230} height={230} className='m-2'/>
-            <Image src="/Products (2).png" alt="chair3" width={230} height={230} className='m-2'/>
-            <Image src="/Products (3).png" alt='chair4' width={230} height={230} className='m-2'/>
-          </div> 
-          <div className='mt-10'>
-            <h1 className='font-inter text-2xl font-semibold text-[#272343] ml-4'>
-              Top Categories
-            </h1>
-            <div className='flex flex-wrap justify-center mt-4'>
-              <Image src="/Category.png" alt="category" width={424} height={424} className='m-2'/>
-              <Image src="/Category (1).png" alt="category" width={424} height={424} className='m-2'/>
-              <Image src="/Category (2).png" alt="category" width={424} height={424} className='m-2'/>
-            </div>
-          </div>
-          
-          {/* Our Products Section */}
-          <div className='mt-10 mr-10'>
-            <h1 className='font-inter text-2xl font-semibold text-[#272343] ml-4'>
-              Our Products
-            </h1>
-            <div className='flex flex-wrap justify-center mt-4 ml-6'>
-              <Image src="/Products.png" alt="chair" width={200} height={200} className='m-4'/>
-              <Image src="/Products (1).png" alt="chair1" width={200} height={200} className='m-4'/>
-              <Image src="/Products (2).png" alt="chair2" width={200} height={200} className='m-4'/>
-              <Image src="/Products (3).png" alt="chair3" width={200} height={200} className='m-4'/>
-              <Image src="/Products (4).png" alt="chair4" width={200} height={200} className='m-4'/>
-              <Image src="/Products (5).png" alt="chair5" width={200} height={200} className='m-4'/>
-              <Image src="/Products (6).png" alt="chair6" width={200} height={200} className='m-4'/>
-              <Image src="/Products.png" alt="chair" width={200} height={200} className='m-4'/>
-            </div>
-          </div>
+    {/* Company Logo */}
+    <Image src="/Company Logo.png" alt="logo" width={1321} height={139} className="mx-auto" />
+
+    {/* Featured Products */}
+    <div className='mt-10 mr-10'>
+        <h2 className='font-inter text-2xl font-semibold text-gray-800'>Featured Products</h2>
+        <div className="grid grid-cols-3 gap-6 mt-4">
+            {ourProducts.map((product) => (
+                <div 
+                key={product._id} 
+                className="card p-4 shadow-lg rounded-lg border max-w-xs mx-auto cursor-pointer"
+                onClick={() => router.push(`/product/${product._id}`)} // 👉 Navigate on click
+            >
+                <div className="overflow-hidden rounded-md">
+                    <img src={product.image.asset.url} 
+                         alt={product.title} 
+                         className='w-full h-60 object-cover rounded-md transition-transform duration-300 hover:scale-110'/>
+                </div>
+                <h3 className='text-center text-lg font-medium mt-2'>{product.title}</h3>
+                </div>
+            ))}
         </div>
-      </div>
+    </div>
+
+    {/* Top Categories Section */}
+    <div className='mt-10'>
+        <h1 className='font-inter text-2xl font-semibold text-[#272343] ml-4'>
+            Top Categories
+        </h1>
+        <div className='flex flex-wrap justify-center mt-4 gap-4'>
+            <Image src="/Category.png" alt="category" width={424} height={424} className='m-2'/>
+            <Image src="/Category (1).png" alt="category" width={424} height={424} className='m-2'/>
+            <Image src="/Category (2).png" alt="category" width={424} height={424} className='m-2'/>
+        </div>
+    </div>
+
+    {/* Our Products Section */}
+    <div className='mt-10'>
+        <h2 className='font-inter text-2xl font-semibold text-gray-800'>Our Products</h2>
+        <div className="grid grid-cols-3 gap-6 mt-4">
+            {ourProducts.map((product) => (
+                <div 
+                key={product._id} 
+                className="card p-4 shadow-lg rounded-lg border max-w-xs mx-auto cursor-pointer"
+                onClick={() => router.push(`/product/${product._id}`)} // 👉 Navigate on click
+            >
+                <div className="overflow-hidden rounded-md">
+                    <img src={product.image.asset.url} 
+                         alt={product.title} 
+                         className='w-full h-60 object-cover rounded-md transition-transform duration-300 hover:scale-110'/>
+                </div>
+                <h3 className='text-center text-lg font-medium mt-2'>{product.title}</h3>
+                </div>
+            ))}
+        </div>
+    </div>
+</div>
+
 
       {/* Footer Section */}
       <div className="flex flex-col h-full mt-auto">
@@ -280,8 +380,6 @@ export default function Home() {
 </footer>
       </div>
     </div>
+    
   );
 }
-
-
-

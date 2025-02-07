@@ -1,0 +1,42 @@
+import { NextResponse } from 'next/server';
+import Stripe from 'stripe';
+
+// Initialize Stripe client with your secret key
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
+  apiVersion: '2025-01-27.acacia',
+});
+
+export async function POST(req: Request) {
+  try {
+    const { cartProducts } = await req.json();
+
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      line_items: cartProducts.map((product: any) => {
+        // ✅ Fix: Sanity Image Handling
+        const imageUrl =
+          product.image?.asset?.url || product.image || 'https://via.placeholder.com/150';
+
+        return {
+          price_data: {
+            currency: 'usd',
+            product_data: {
+              name: product.title,
+              images: [imageUrl], // Ensure valid image URL
+            },
+            unit_amount: product.totalPrice * 100, // Convert to cents
+          },
+          quantity: product.quantity,
+        };
+      }),
+      mode: 'payment',
+      success_url: `${req.headers.get('origin')}/success`,
+      cancel_url: `${req.headers.get('origin')}/cancel`,
+    });
+
+    return NextResponse.json({ id: session.id });
+  } catch (error) {
+    console.error('Stripe Checkout Error:', error);
+    return NextResponse.json({ error: (error as Error).message }, { status: 500 });
+  }
+}
