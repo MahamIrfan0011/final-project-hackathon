@@ -55,11 +55,12 @@ const ProductDetails = () => {
 
   const builder = imageUrlBuilder(sanityClient);
 
-  const urlFor = (source: { asset: { _ref: string } }) => {
-    if (!source?.asset?._ref) return null;
-    return builder.image(source.asset._ref).url();
+  const urlFor = (source: { asset: { _ref: string } } | undefined): string =>  {
+    if (!source?.asset?._ref) {;
+    return '/placeholder-image.jpg';
   };
-
+  return builder.image(source.asset._ref).url();
+}
   useEffect(() => {
     if (!id) {
       setError('Product ID is missing');
