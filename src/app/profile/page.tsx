@@ -1,7 +1,7 @@
 'use client';
 import Link from 'next/link';
 import { SignedIn, SignedOut, SignUp, useUser } from "@clerk/nextjs";
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { useRouter } from 'next/navigation'; // Import useRouter for redirection
 
 const ProfilePage = () => {
