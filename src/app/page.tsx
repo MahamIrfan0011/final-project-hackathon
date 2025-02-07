@@ -1,13 +1,11 @@
 'use client';
-import { MouseEvent } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import Navbar from "./components/Navbar";
-import { FaShoppingCart } from 'react-icons/fa'; // Importing the shopping cart icon
-import { useState } from 'react';
+import { FaShoppingCart } from 'react-icons/fa';
+import { useState, useEffect } from 'react';
 import {sanityClient} from '@/sanity/lib/client';
-import { useRouter } from 'next/navigation'; 
-import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
 interface Product {
   _id: string;
@@ -28,7 +26,8 @@ interface Category {
       };
   };
 }
-const fetchData = async () => {
+
+const fetchData = async (): Promise<{ ourProducts: Product[], featuredProducts: Product[], topCategories: Category[] }> => {
   const query = `
     {
         "ourProducts": *[_type == "products"] {
@@ -64,52 +63,52 @@ const fetchData = async () => {
   const data = await sanityClient.fetch(query);
   return data;
 };
+
 export default function Home() {
-  const CartButton = () => {
-    // Initialize the cart count state
-    const [cartCount, setCartCount] = useState(0);
-  
-    // Function to handle adding a product to the cart
-    const addToCart = () => {
-      setCartCount(cartCount + 1); // Increase the cart count by 1
-    };}
-  const router = useRouter(); // Initialize the router
+  const router = useRouter();
+  const [cartCount, setCartCount] = useState(0);
   const [ourProducts, setOurProducts] = useState<Product[]>([]);
-    const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
-    const [topCategories, setTopCategories] = useState<Category[]>([]);
-
-    useEffect(() => {
-        const getData = async () => {
-            const data = await fetchData();
-            setOurProducts(data.ourProducts);
-            setFeaturedProducts(data.featuredProducts);
-            setTopCategories(data.topCategories);
-        };
-        getData();
-    }, []);
-
+  const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
+  const [topCategories, setTopCategories] = useState<Category[]>([]);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
+  // Function to handle adding a product to the cart
+  const handleAddToCart = () => {
+    setCartCount(prevCount => prevCount + 1);
+  };
+
+  useEffect(() => {
+    const getData = async () => {
+        const data = await fetchData();
+        setOurProducts(data.ourProducts);
+        setFeaturedProducts(data.featuredProducts);
+        setTopCategories(data.topCategories);
+    };
+    getData();
+  }, []);
+
   const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen); // Toggle menu open/close
+    setIsMenuOpen(!isMenuOpen);
   };
 
   // Close dropdown when clicking outside
   useEffect(() => {
-    const handleClickOutside = (event: Event) => {
+    const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as HTMLElement;
       if (dropdownOpen && !target.closest('.dropdown')) {
         setDropdownOpen(false);
       }
     };
   
-    document.addEventListener('mousedown', handleClickOutside as EventListener);
+    document.addEventListener('mousedown', handleClickOutside);
     
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside as EventListener);
+      document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [dropdownOpen]);
+
+  // Rest of your component code remains the same, but let's update the cart button to use the new state:
   return (
     <div className="min-h-screen bg-white flex flex-col">
       <Navbar />
@@ -119,12 +118,14 @@ export default function Home() {
         
         {/* Cart Button */}
         <Link href="/product1">
-          <button className="w-28 h-10 bg-white rounded-md flex items-center justify-center relative">
-            <FaShoppingCart className="text-black mr-2" /> {/* Cart Icon */}
+          <button 
+            className="w-28 h-10 bg-white rounded-md flex items-center justify-center relative"
+            onClick={handleAddToCart}
+          >
+            <FaShoppingCart className="text-black mr-2" />
             <p className="text-black">Cart</p>
-            {/* Badge Circle with Number */}
             <div className="absolute top-0 right-0 w-6 h-6 rounded-full bg-[#007580] text-white text-xs flex items-center justify-center">
-              0 {/* This is the number you can update */}
+              {cartCount}
             </div>
           </button>
         </Link>

@@ -32,8 +32,8 @@ export default function Home() {
         }`;
         const result = await client.fetch(query);
         setProducts(result);
-      } catch (error) {
-        console.error("Error fetching products:", error);
+      } catch (_) {
+        console.error("Error fetching products");
       }
     };
     fetchProducts();
