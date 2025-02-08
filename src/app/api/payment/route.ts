@@ -10,8 +10,8 @@ interface Product {
 }
 
 // Initialize Stripe client with your secret key
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
-  apiVersion: '2025-01-27.acacia',
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
+  apiVersion: '2025-01-27.acacia'  // Use this since your types expect it
 });
 console.log("Stripe Secret Key:", process.env.STRIPE_SECRET_KEY ? "Loaded" : "Not Loaded");
 
