@@ -57,7 +57,7 @@ const ProductDetails = () => {
         } else {
           setError('Product not found');
         }
-      } catch (error) {
+      } catch (err) {
         console.error("Error fetching product details:", error);
         setError('Error fetching product details');
       } finally {
@@ -81,7 +81,7 @@ const ProductDetails = () => {
       setNewReview({ rating: 0, comment: '', author: '' });
 
       alert('Review submitted successfully!');
-    } catch (error) {
+    } catch {
       alert('Failed to submit review');
     }
   };

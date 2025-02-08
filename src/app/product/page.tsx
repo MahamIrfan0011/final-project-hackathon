@@ -74,7 +74,6 @@ export default function Home() {
       const existingProductIndex = prevCartProducts.findIndex((item) => item._id === product._id);
       
       if (existingProductIndex > -1) {
-        // If product exists, increment its quantity
         const updatedCart = [...prevCartProducts];
         updatedCart[existingProductIndex] = {
           ...updatedCart[existingProductIndex],
@@ -83,7 +82,6 @@ export default function Home() {
         };
         return updatedCart;
       } else {
-        // If product doesn't exist, add new product
         return [
           ...prevCartProducts,
           { 
@@ -99,33 +97,25 @@ export default function Home() {
     setIsCartOpen(true);
   };
 
-  // Increment Quantity
-  const incrementQuantity = (id: string) => {
-    setCartProducts((prevCartProducts) => 
+  // Increase Quantity
+  const increaseQuantity = (id: string) => {
+    setCartProducts((prevCartProducts) =>
       prevCartProducts.map((item) =>
         item._id === id
-          ? { 
-              ...item, 
-              quantity: item.quantity + 1, 
-              totalPrice: (item.quantity + 1) * item.price 
-            }
+          ? { ...item, quantity: item.quantity + 1, totalPrice: (item.quantity + 1) * item.price }
           : item
       )
     );
   };
 
-  // Decrement Quantity
-  const decrementQuantity = (id: string) => {
-    setCartProducts((prevCartProducts) => 
+  // Decrease Quantity
+  const decreaseQuantity = (id: string) => {
+    setCartProducts((prevCartProducts) =>
       prevCartProducts.map((item) =>
         item._id === id && item.quantity > 1
-          ? { 
-              ...item, 
-              quantity: item.quantity - 1, 
-              totalPrice: (item.quantity - 1) * item.price 
-            }
+          ? { ...item, quantity: item.quantity - 1, totalPrice: (item.quantity - 1) * item.price }
           : item
-      )
+      ).filter(item => item.quantity > 0) // اگر quantity 0 ہو جائے تو remove کر دیں۔
     );
   };
 
@@ -172,7 +162,6 @@ export default function Home() {
             />
             <h2 className="mt-2 font-bold">{product.title}</h2>
             <p className="text-gray-700">Price: ${product.price}</p>
-            {product.discount && <p className="text-green-500">Discount: {product.discount}%</p>}
             <button 
               onClick={() => addToCart(product)} 
               className="mt-4 bg-green-500 text-white px-4 py-2 rounded-lg"
@@ -198,6 +187,11 @@ export default function Home() {
               <div key={item._id} className="flex justify-between items-center mb-4">
                 <Image src={item.image} alt={item.title} width={50} height={50} className="rounded-lg" />
                 <span>{item.title}</span>
+                <div className="flex items-center">
+                  <button onClick={() => decreaseQuantity(item._id)}><FaMinus /></button>
+                  <span className="mx-2">{item.quantity}</span>
+                  <button onClick={() => increaseQuantity(item._id)}><FaPlus /></button>
+                </div>
                 <span>${item.totalPrice.toFixed(2)}</span>
                 <button onClick={() => removeItem(item._id)}><FaTrashAlt /></button>
               </div>
@@ -205,14 +199,9 @@ export default function Home() {
 
             <div className="text-right font-bold text-lg">Total: ${totalPrice.toFixed(2)}</div>
 
-            
-
-<button 
-  onClick={() => router.push('/checkout')} 
-  className="w-full mt-4 bg-blue-500 text-white py-2 rounded-lg flex items-center justify-center"
->
-  <FaCreditCard className="mr-2" /> Checkout
-</button>
+            <button onClick={() => router.push('/checkout')} className="w-full mt-4 bg-blue-500 text-white py-2 rounded-lg">
+              <FaCreditCard className="mr-2" /> Checkout
+            </button>
 
             <button onClick={() => setIsCartOpen(false)} className="w-full mt-2 bg-gray-500 text-white py-2 rounded-lg">
               Close

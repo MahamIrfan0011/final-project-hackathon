@@ -231,7 +231,7 @@ export default function Home() {
   <h2 className="text-2xl font-bold text-[#272343]">Featured Products</h2>
   <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
     {featuredProducts.map((product) => (
-      <Link key={product._id} href={`/product/${product._id}`} className="border p-4 rounded-lg block">
+      <Link key={product._id} href={`/product/${product._id}`} className="border p-4 rounded-lg block shadow-xl cursor-pointer hover:shadow-lg transition">
         <Image src={product.image.asset.url} alt={product.title} width={400} height={400} />
         <p className="mt-2 font-medium">{product.title}</p>
       </Link>
@@ -244,7 +244,7 @@ export default function Home() {
   <h2 className="text-2xl font-bold text-[#272343]">Top Categories</h2>
   <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
     {topCategories.map((category) => (
-      <Link key={category._id} href={`/category/${category._id}`} className="border p-4 rounded-lg block">
+      <Link key={category._id} href={`/category/${category._id}`} className="border p-4 rounded-lg shadow-xl block cursor-pointer hover:shadow-lg transition">
         <Image src={category.image.asset.url} alt={category.title} width={400} height={400} />
         <p className="mt-2 font-medium">{category.title}</p>
       </Link>
@@ -255,16 +255,24 @@ export default function Home() {
 {/* Our Products Section */}
 <div className="w-full max-w-6xl mx-auto px-4 py-8">
   <h2 className="text-2xl font-bold text-[#272343]">Our Products</h2>
-  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
-    {featuredProducts.map((product) => (
-      <Link key={product._id} href={`/product/${product._id}`} className="border p-4 rounded-lg block">
-        <Image src={product.image.asset.url} alt={product.title} width={400} height={400} />
-        <p className="mt-2 font-medium">{product.title}</p>
+  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+    {ourProducts.map((product) => (
+      <Link key={product._id} href={`/product/${product._id}`} passHref>
+        <div className="bg-white p-4 rounded-lg shadow-xl cursor-pointer hover:shadow-lg transition border">
+          <Image
+            src={product.image.asset.url}
+            alt={product.title}
+            width={400}
+            height={400}
+            className="rounded-lg"
+          />
+          <h3 className="text-lg font-semibold text-[#272343] mt-2">{product.title}</h3>
+        </div>
       </Link>
     ))}
   </div>
 </div>
-</div>
+
 
 
 
@@ -348,6 +356,6 @@ export default function Home() {
 </footer>
       </div>
     </div>
-    
+    </div>
   );
 }
