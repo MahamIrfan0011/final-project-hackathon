@@ -84,9 +84,11 @@ const ProductDetails = () => {
 
   if (loading) return <p className="text-center text-lg">Loading product...</p>;
   if (error) return <p className="text-center text-red-500">{error}</p>;
+  
 
   return (
     <div className="container mx-auto p-6">
+     
       {/* Product details */}
       <div className="flex flex-col md:flex-row gap-6">
         <div className="flex-1 relative">
@@ -108,6 +110,10 @@ const ProductDetails = () => {
         <div className="flex-1 mt-10 md:mt-28">
           <h1 className="text-3xl font-semibold text-gray-800 mb-4">{product?.title}</h1>
           <p className="text-lg text-gray-600 mb-4">{product?.description}</p>
+          <p className="text-md text-green-600 mb-4">
+  Available Inventory: {product?.inventory} ({product?.inventory > 0 ? "In Stock" : "Out of Stock"})
+</p>
+
           <button
             onClick={() => alert(`${product?.title} added to cart!`)}
             disabled={!product?.inventory || product.inventory <= 0}
@@ -164,9 +170,91 @@ const ProductDetails = () => {
           </button>
         </div>
       </div>
-    </div>
+      {/* Footer Section */}
+            <div className="flex flex-col h-full mt-auto">
+              {/* Main Content */}
+              <div className="flex-grow">
+                <div className="bg-white w-full flex flex-col md:flex-row items-start justify-around p-4">
+                  {/* Logo and Paragraph Section */}
+                  <div className="flex flex-col items-center mb-4">
+                    <Image src="/logo-sofa.png" alt="logo" width={128} height={20} />
+                    <p className="font-inter text-center text-sm text-[#272343] mt-4 leading-6">
+                      Vivamus tristique odio sit amet<br /> velit semper, eu posuere turpis<br />  
+                    </p>
+                    <Image src="/Social Links.png" alt="social accounts" width={206} height={38} className='mt-4'/>
+                  </div>
+      
+                  {/* CATEGORY Section */}
+                  <div className="mt-4">
+                    <h4 className="font-inter font-medium text-sm leading-6 tracking-[3px] text-[#9A9CAA] mb-4">
+                      CATEGORY
+                    </h4>
+                    <ul className="space-y-2 text-justify">
+                      {['Sofa', 'Armchair', 'Wing Chair', 'Desk Chair', 'Wooden Chair', 'Park Bench'].map(category => (
+                        <li key={category} className="font-inter font-normal text-sm leading-6 text-[#272343] hover:text-black cursor-pointer">
+                          {category}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+      
+                  {/* SUPPORT Section */}
+                  <div className="mt-4">
+                    <h4 className="font-inter font-medium text-sm leading-6 tracking-[3px] text-[#9A9CAA] mb-4">
+                      SUPPORT
+                    </h4>
+                    <ul className="space-y-2 text-justify">
+                      {['Help & Support', 'Terms & Conditions', 'Privacy Policy', 'Help'].map(support => (
+                        <li key={support} className="font-inter font-normal text-sm leading-6 text-[#272343] hover:text-black cursor-pointer">
+                          {support}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+      
+                  {/* NEWSLETTER Section */}
+                  <div className="mt-4 mr-2">
+                    <h4 className="font-inter font-medium text-sm text-[#9A9CAA]">
+                      NEWSLETTER
+                    </h4>
+                    <div className="mt-2 flex">
+                      <input 
+                        type="email" 
+                        id="email" 
+                        className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                        placeholder="Your email"
+                      />
+                      <button className="w-32 h-10 bg-[#029FAE] text-white text-sm font-inter font-semibold rounded-md">
+                        Subscribe
+                      </button>
+                    </div>
+                    <p className="font-inter text-sm text-[#272343] text-justify mt-2">
+                      Lorem, ipsum dolor sit amet consectetur adipisicing elit<br />. 
+                    </p>
+                  </div>
+                </div>
+              </div>
+      
+              {/* Footer Section */}
+              <footer className="w-full flex items-center justify-center bg-white px-4 mt-auto">
+        <div className="flex w-full items-center justify-between flex-col lg:flex-row mr-6">
+          {/* Text on the first line for mobile, second line for large devices */}
+          <p className="font-Poppins text-sm text-[rgba(0,0,0,0.6)] whitespace-nowrap pl-6 lg:pl-16 mb-4 lg:mb-0 mr-4">
+            @2021-Blogy-Designed & Developed 
+            <span className="block lg:inline font-bold">by Zakirsoft</span> {/* Make Zakirsoft appear on the next line on mobile */}
+          </p>
+          
+          {/* Image on the second line for mobile, same line for large devices */}
+          <Image src="/Group 13 (1).png" alt="accounts" width={227} height={27} />
+        </div>
+      </footer>
+            </div>
+          </div>
+  
+    
   );
 };
 
 export default ProductDetails;
+
 

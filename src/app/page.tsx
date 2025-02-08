@@ -232,7 +232,7 @@ export default function Home() {
   <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
     {featuredProducts.map((product) => (
       <Link key={product._id} href={`/product/${product._id}`} className="border p-4 rounded-lg block shadow-xl cursor-pointer hover:shadow-lg transition">
-        <Image src={product.image.asset.url} alt={product.title} width={400} height={400} />
+        <Image src={product.image.asset.url} alt={product.title} width={400} height={400} className="transition-transform duration-300 hover:scale-105"/>
         <p className="mt-2 font-medium">{product.title}</p>
       </Link>
     ))}
@@ -245,7 +245,7 @@ export default function Home() {
   <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
     {topCategories.map((category) => (
       <Link key={category._id} href={`/category/${category._id}`} className="border p-4 rounded-lg shadow-xl block cursor-pointer hover:shadow-lg transition">
-        <Image src={category.image.asset.url} alt={category.title} width={400} height={400} />
+        <Image src={category.image.asset.url} alt={category.title} width={400} height={400} className="transition-transform duration-300 hover:scale-105"/>
         <p className="mt-2 font-medium">{category.title}</p>
       </Link>
     ))}
@@ -264,7 +264,7 @@ export default function Home() {
             alt={product.title}
             width={400}
             height={400}
-            className="rounded-lg"
+            className="rounded-lg className=transition-transform duration-300 hover:scale-105"
           />
           <h3 className="text-lg font-semibold text-[#272343] mt-2">{product.title}</h3>
         </div>
