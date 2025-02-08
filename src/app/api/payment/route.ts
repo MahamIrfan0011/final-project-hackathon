@@ -1,6 +1,14 @@
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 
+// Define a Product type
+interface Product {
+  title: string;
+  image?: { asset?: { url?: string } } | string;
+  totalPrice: number;
+  quantity: number;
+}
+
 // Initialize Stripe client with your secret key
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
   apiVersion: '2025-01-27.acacia',
@@ -8,14 +16,16 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
 
 export async function POST(req: Request) {
   try {
-    const { cartProducts } = await req.json();
+    const { cartProducts }: { cartProducts: Product[] } = await req.json();
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
-      line_items: cartProducts.map((product: any) => {
+      line_items: cartProducts.map((product: Product) => {
         // ✅ Fix: Sanity Image Handling
         const imageUrl =
-          product.image?.asset?.url || product.image || 'https://via.placeholder.com/150';
+          typeof product.image === 'string'
+            ? product.image
+            : product.image?.asset?.url || 'https://via.placeholder.com/150';
 
         return {
           price_data: {

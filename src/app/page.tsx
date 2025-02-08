@@ -48,7 +48,7 @@ const fetchData = async (): Promise<{ ourProducts: Product[], featuredProducts: 
                 }
             }
         },
-        "topCategories": *[_type == "category"] {
+        "topCategories": *[_type == "categories"] {
             _id,
             title,
             image {
@@ -247,66 +247,49 @@ export default function Home() {
     {/* Company Logo */}
     <Image src="/Company Logo.png" alt="logo" width={1321} height={139} className="mx-auto" />
 
-    {/* Featured Products */}
-    <div className='mt-10 mr-10'>
-        <h2 className='font-inter text-2xl font-semibold text-gray-800'>Featured Products</h2>
-        <div className="grid grid-cols-3 sm:grid-col gap-6 mt-4">
-            {ourProducts.map((product) => (
-                <div 
-                key={product._id} 
-                className="card p-4 shadow-lg rounded-lg border max-w-xs mx-auto cursor-pointer"
-                onClick={() => router.push(`/product/${product._id}`)} // 👉 Navigate on click
-            >
-                <div className="overflow-hidden rounded-md">
-                    <Image src={product.image.asset.url} 
-                         alt={product.title} 
-                         width={60}
-                         height={60}
-                         unoptimized={true}
-                         className='w-full h-60 object-cover rounded-md transition-transform duration-300 hover:scale-110'/>
-                </div>
-                <h3 className='text-center text-lg font-medium mt-2'>{product.title}</h3>
-                </div>
-            ))}
-        </div>
-    </div>
+    import Link from "next/link";
+import Image from "next/image";
 
-    {/* Top Categories Section */}
-    <div className='mt-10'>
-        <h1 className='font-inter text-2xl font-semibold text-[#272343] ml-4'>
-            Top Categories
-        </h1>
-        <div className='flex flex-wrap justify-center mt-4 gap-4'>
-            <Image src="/Category.png" alt="category" width={424} height={424} className='m-2'/>
-            <Image src="/Category (1).png" alt="category" width={424} height={424} className='m-2'/>
-            <Image src="/Category (2).png" alt="category" width={424} height={424} className='m-2'/>
-        </div>
-    </div>
-
-    {/* Our Products Section */}
-    <div className='mt-10'>
-        <h2 className='font-inter text-2xl font-semibold text-gray-800'>Our Products</h2>
-        <div className="grid grid-cols-3 sm:grid-col gap-6 mt-4">
-            {ourProducts.map((product) => (
-                <div 
-                key={product._id} 
-                className="card p-4 shadow-lg rounded-lg border max-w-xs mx-auto cursor-pointer"
-                onClick={() => router.push(`/product/${product._id}`)} // 👉 Navigate on click
-            >
-                <div className="overflow-hidden rounded-md">
-                    <Image src={product.image.asset.url} 
-                         alt={product.title} 
-                         width={60}
-                         height={60}
-                         unoptimized={true}
-                         className='w-full h-60 object-cover rounded-md transition-transform duration-300 hover:scale-110'/>
-                </div>
-                <h3 className='text-center text-lg font-medium mt-2'>{product.title}</h3>
-                </div>
-            ))}
-        </div>
-    </div>
+{/* Featured Products Section */}
+<div className="w-full max-w-6xl mx-auto px-4 py-8">
+  <h2 className="text-2xl font-bold text-[#272343]">Featured Products</h2>
+  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
+    {featuredProducts.map((product) => (
+      <Link key={product._id} href={`/product/${product._id}`} className="border p-4 rounded-lg block">
+        <Image src={product.image.asset.url} alt={product.title} width={400} height={400} />
+        <p className="mt-2 font-medium">{product.title}</p>
+      </Link>
+    ))}
+  </div>
 </div>
+
+{/* Top Categories Section */}
+<div className="w-full max-w-6xl mx-auto px-4 py-8">
+  <h2 className="text-2xl font-bold text-[#272343]">Top Categories</h2>
+  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
+    {topCategories.map((category) => (
+      <Link key={category._id} href={`/category/${category._id}`} className="border p-4 rounded-lg block">
+        <Image src={category.image.asset.url} alt={category.title} width={400} height={400} />
+        <p className="mt-2 font-medium">{category.title}</p>
+      </Link>
+    ))}
+  </div>
+</div>
+
+{/* Our Products Section */}
+<div className="w-full max-w-6xl mx-auto px-4 py-8">
+  <h2 className="text-2xl font-bold text-[#272343]">Our Products</h2>
+  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
+    {featuredProducts.map((product) => (
+      <Link key={product._id} href={`/product/${product._id}`} className="border p-4 rounded-lg block">
+        <Image src={product.image.asset.url} alt={product.title} width={400} height={400} />
+        <p className="mt-2 font-medium">{product.title}</p>
+      </Link>
+    ))}
+  </div>
+</div>
+</div>
+
 
 
       {/* Footer Section */}

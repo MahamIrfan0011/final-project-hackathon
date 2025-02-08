@@ -5,19 +5,28 @@ import { loadStripe } from '@stripe/stripe-js';
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY as string);
 
+// Define a Product type
+interface Product {
+  _id: string;
+  title: string;
+  image?: { asset?: { url?: string } } | string;
+  totalPrice: number;
+  quantity: number;
+}
+
 export default function Checkout() {
-  const [cartProducts, setCartProducts] = useState<any[]>([]);
+  const [cartProducts, setCartProducts] = useState<Product[]>([]); // ✅ Use Product[] instead of any[]
 
   useEffect(() => {
-    const storedCart = localStorage.getItem("cart");
+    const storedCart = localStorage.getItem('cart');
     if (storedCart) {
       try {
-        const parsedCart = JSON.parse(storedCart);
+        const parsedCart: Product[] = JSON.parse(storedCart); // ✅ Explicitly define the type
         console.log('Cart loaded:', parsedCart);
         setCartProducts(parsedCart);
       } catch (error) {
         console.error('Invalid cart data:', error);
-        localStorage.removeItem("cart");
+        localStorage.removeItem('cart');
       }
     }
   }, []);
@@ -64,7 +73,10 @@ export default function Checkout() {
         <ul className="space-y-4">
           {cartProducts.map((item) => {
             // ✅ Fix: Sanity image handling with fallback
-            const imageUrl = item.image?.asset?.url || item.image || '/placeholder.png';
+            const imageUrl =
+              typeof item.image === 'string'
+                ? item.image
+                : item.image?.asset?.url || '/placeholder.png';
 
             return (
               <li key={item._id} className="flex items-center space-x-4 border-b pb-4">

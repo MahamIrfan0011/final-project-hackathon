@@ -2,8 +2,24 @@
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import { FaCartPlus, FaTrashAlt, FaPlus, FaMinus, FaShoppingCart } from 'react-icons/fa';
+import { FaCartPlus, FaTrashAlt, FaPlus, FaMinus, FaShoppingCart, FaTimes, FaCreditCard } from 'react-icons/fa';
 import { createClient } from '@sanity/client';
+
+// Define Product Type
+interface Product {
+  _id: string;
+  title: string;
+  price: number;
+  discount?: number;
+  image: string;
+}
+
+// Define Cart Product Type
+interface CartProduct extends Product {
+  quantity: number;
+  totalPrice: number;
+  shipmentStatus: string;
+}
 
 // Sanity Client Setup
 const client = createClient({
@@ -15,8 +31,8 @@ const client = createClient({
 
 export default function Home() {
   const router = useRouter();
-  const [products, setProducts] = useState<any[]>([]);
-  const [cartProducts, setCartProducts] = useState<any[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [cartProducts, setCartProducts] = useState<CartProduct[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
 
   // Fetch products from Sanity
@@ -30,10 +46,10 @@ export default function Home() {
           discount,
           "image": image.asset->url
         }`;
-        const result = await client.fetch(query);
+        const result: Product[] = await client.fetch(query);
         setProducts(result);
-      } catch (_) {
-        console.error("Error fetching products");
+      } catch (error) {
+        console.error("Error fetching products:", error);
       }
     };
     fetchProducts();
@@ -53,7 +69,7 @@ export default function Home() {
   }, [cartProducts]);
 
   // Add to Cart Function
-  const addToCart = (product: any) => {
+  const addToCart = (product: Product) => {
     setCartProducts((prevCartProducts) => {
       const existingProductIndex = prevCartProducts.findIndex((item) => item._id === product._id);
       
@@ -121,8 +137,7 @@ export default function Home() {
   };
 
   // Calculate Total Price
-  const calculateTotalPrice = () => 
-    cartProducts.reduce((total, item) => total + item.totalPrice, 0);
+  const totalPrice = cartProducts.reduce((total, item) => total + item.totalPrice, 0);
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
@@ -168,59 +183,38 @@ export default function Home() {
         ))}
       </div>
 
-      {/* Proceed to Checkout Button */}
-      {cartProducts.length > 0 && (
-        <div className="fixed bottom-5 right-5">
-          <button 
-            onClick={() => router.push('/checkout')} 
-            className="bg-blue-500 text-white px-6 py-3 rounded-lg"
-          >
-            Proceed to Checkout
-          </button>
-        </div>
-      )}
-
       {/* Cart Modal */}
       {isCartOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-lg shadow-lg w-96 max-h-96 overflow-y-auto">
-            <h2 className="text-2xl font-bold mb-4">Shopping Cart</h2>
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-2xl font-bold">Shopping Cart</h2>
+              <button onClick={() => setIsCartOpen(false)} className="text-gray-500">
+                <FaTimes size={20} />
+              </button>
+            </div>
+            
             {cartProducts.map((item) => (
               <div key={item._id} className="flex justify-between items-center mb-4">
-                <Image 
-                  src={item.image} 
-                  alt={item.title} 
-                  width={50} 
-                  height={50} 
-                  className="rounded-lg" 
-                />
-                <span className="ml-4">{item.title}</span>
-                <div className="flex items-center">
-                  <button onClick={() => decrementQuantity(item._id)}><FaMinus /></button>
-                  <span className="mx-2">{item.quantity}</span>
-                  <button onClick={() => incrementQuantity(item._id)}><FaPlus /></button>
-                </div>
+                <Image src={item.image} alt={item.title} width={50} height={50} className="rounded-lg" />
+                <span>{item.title}</span>
                 <span>${item.totalPrice.toFixed(2)}</span>
                 <button onClick={() => removeItem(item._id)}><FaTrashAlt /></button>
               </div>
             ))}
-            <div className="mt-4 flex justify-between">
-              <button 
-                onClick={() => router.push('/checkout')} 
-                className="bg-blue-500 text-white px-4 py-2 rounded-lg"
-              >
-                Checkout
-              </button>
-              <button 
-                onClick={() => setIsCartOpen(false)} 
-                className="bg-gray-500 text-white px-3 py-2 rounded-lg"
-              >
-                Close
-              </button>
-            </div>
+
+            <div className="text-right font-bold text-lg">Total: ${totalPrice.toFixed(2)}</div>
+            <button className="w-full mt-4 bg-blue-500 text-white py-2 rounded-lg flex items-center justify-center">
+              <FaCreditCard className="mr-2" /> Checkout
+            </button>
+
+            <button onClick={() => setIsCartOpen(false)} className="w-full mt-2 bg-gray-500 text-white py-2 rounded-lg">
+              Close
+            </button>
           </div>
         </div>
       )}
     </div>
   );
 }
+
