@@ -4,8 +4,7 @@ import Link from 'next/link';
 import Navbar from "./components/Navbar";
 import { FaShoppingCart } from 'react-icons/fa';
 import { useState, useEffect } from 'react';
-import {sanityClient} from '@/sanity/lib/client';
-import { useRouter } from 'next/navigation';
+import { sanityClient } from '@/sanity/lib/client';
 
 interface Product {
   _id: string;
@@ -65,7 +64,6 @@ const fetchData = async (): Promise<{ ourProducts: Product[], featuredProducts: 
 };
 
 export default function Home() {
-  const router = useRouter();
   const [cartCount, setCartCount] = useState(0);
   const [ourProducts, setOurProducts] = useState<Product[]>([]);
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
@@ -73,7 +71,6 @@ export default function Home() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
-  // Function to handle adding a product to the cart
   const handleAddToCart = () => {
     setCartCount(prevCount => prevCount + 1);
   };
@@ -92,7 +89,6 @@ export default function Home() {
     setIsMenuOpen(!isMenuOpen);
   };
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as HTMLElement;
@@ -108,15 +104,12 @@ export default function Home() {
     };
   }, [dropdownOpen]);
 
-  // Rest of your component code remains the same, but let's update the cart button to use the new state:
   return (
     <div className="min-h-screen bg-white flex flex-col">
       <Navbar />
-      {/* Top Section with Logo and Cart Button */}
       <div className="w-full h-20 bg-[#F0F2F3] py-4 px-4 md:px-6 flex justify-between items-center md:px-20 lg:px-40">
         <Image src="/logo-sofa.png" alt="logo" width={166} height={40} />
         
-        {/* Cart Button */}
         <Link href="/product1">
           <button 
             className="w-28 h-10 bg-white rounded-md flex items-center justify-center relative"
@@ -131,7 +124,6 @@ export default function Home() {
         </Link>
       </div>
 
-      {/* Hamburger Menu for Mobile */}
       <div className="md:hidden flex justify-between items-center px-4 py-4">
         <button onClick={toggleMenu} className="text-[#007580]">
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -140,7 +132,6 @@ export default function Home() {
         </button>
       </div>
 
-      {/* Mobile Menu - Show when 'isMenuOpen' is true */}
       {isMenuOpen && (
         <div className="md:hidden bg-white w-full p-4">
           <ul className="space-y-4 text-center">
@@ -156,14 +147,7 @@ export default function Home() {
                 onClick={() => setDropdownOpen(!dropdownOpen)}
               >
                 Eng
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="ml-2 h-4 w-4"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth={2}
-                  viewBox="0 0 24 24"
-                >
+                <svg xmlns="http://www.w3.org/2000/svg" className="ml-2 h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
                 </svg>
               </button>
@@ -185,16 +169,9 @@ export default function Home() {
               <button className="text-[#007580]">Need Help</button>
             </li>
           </ul>
-        
-
-            {/* Cart Button in Mobile Menu */}
-            
-        
         </div>
-        
       )}
 
-      {/* Navigation Bar with clickable items */}
       <div className="w-full h-18 bg-white flex text-[#636270] hidden md:flex pr-40">
         <ul className="w-full flex flex-wrap justify-center space-x-4 md:space-x-8">
           <li className="cursor-pointer text-[#007580]">
@@ -247,8 +224,7 @@ export default function Home() {
     {/* Company Logo */}
     <Image src="/Company Logo.png" alt="logo" width={1321} height={139} className="mx-auto" />
 
-    import Link from "next/link";
-import Image from "next/image";
+    
 
 {/* Featured Products Section */}
 <div className="w-full max-w-6xl mx-auto px-4 py-8">

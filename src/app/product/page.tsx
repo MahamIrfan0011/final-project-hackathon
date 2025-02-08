@@ -2,7 +2,7 @@
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import { FaCartPlus, FaTrashAlt, FaPlus, FaMinus, FaShoppingCart, FaTimes, FaCreditCard } from 'react-icons/fa';
+import { FaCartPlus, FaTrashAlt, FaShoppingCart, FaTimes, FaCreditCard, FaPlus, FaMinus } from 'react-icons/fa';
 import { createClient } from '@sanity/client';
 
 // Define Product Type
@@ -204,9 +204,15 @@ export default function Home() {
             ))}
 
             <div className="text-right font-bold text-lg">Total: ${totalPrice.toFixed(2)}</div>
-            <button className="w-full mt-4 bg-blue-500 text-white py-2 rounded-lg flex items-center justify-center">
-              <FaCreditCard className="mr-2" /> Checkout
-            </button>
+
+            
+
+<button 
+  onClick={() => router.push('/checkout')} 
+  className="w-full mt-4 bg-blue-500 text-white py-2 rounded-lg flex items-center justify-center"
+>
+  <FaCreditCard className="mr-2" /> Checkout
+</button>
 
             <button onClick={() => setIsCartOpen(false)} className="w-full mt-2 bg-gray-500 text-white py-2 rounded-lg">
               Close
@@ -217,4 +223,3 @@ export default function Home() {
     </div>
   );
 }
-
